@@ -42,6 +42,12 @@
         <p>No matches</p>
       </div>
     </div>
+    <div class="container my-4">
+      <h2>Standings</h2>
+      <div id="standings-pane">
+        <p>No standings</p>
+      </div>
+    </div>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
@@ -169,10 +175,17 @@
         const matchesPanes = document.getElementById("matches-panes");
         matchesPanes.replaceChildren();
 
+        const standingsPane = document.getElementById("standings-pane");
+        standingsPane.replaceChildren();
+
         if (matches.length === 0) {
           const matchesText = document.createElement("p");
           matchesText.appendChild(document.createTextNode("No matches"));
           matchesPanes.replaceChildren(matchesText);
+
+          const standingsText = document.createElement("p");
+          standingsText.appendChild(document.createTextNode("No standings"));
+          standingsPane.replaceChildren(standingsText);
 
           submitButton.blur();
           return;
@@ -237,6 +250,166 @@
           roundPane.appendChild(matchesTable);
           matchesPanes.appendChild(roundPane);
         });
+
+        if (players.length === 0) {
+          const standingsText = document.createElement("p");
+          standingsText.appendChild(
+            document.createTextNode("No standings (missing player data)")
+          );
+          standingsPane.replaceChildren(standingsText);
+
+          submitButton.blur();
+          return;
+        }
+
+        const completedRoundNumbers = roundNumbers.filter(
+          (number) =>
+            matches
+              .filter((match) => match.RoundNumber == number)
+              .every((match) => match.HasResults)
+        );
+
+        const sum = (a, b) => { return a + b; };
+
+        const computeMatches = (username) => {
+          return matches.filter(
+            (match) =>
+              completedRoundNumbers.includes(match.RoundNumber)
+                && [match.Player1Username, match.Player2Username].includes(username)
+          )
+        }
+
+        const computePoints = (username) => {
+          return computeMatches(username)
+            .map((match) =>
+              match.GameDraws === 3
+                ? 0
+                : username == match.Player1Username
+                  ? match.Player1GameAndByeWins == 2 ? 3 : match.Player1GameAndByeWins
+                  : match.Player2GameAndByeWins == 2 ? 3 : match.Player2GameAndByeWins
+            )
+            .reduce(sum, 0);
+        };
+
+        const computeGamesWon = (username) => {
+          return computeMatches(username)
+            .map((match) =>
+              username == match.Player1Username
+                ? match.Player1GameAndByeWins : match.Player2GameAndByeWins
+            )
+            .reduce(sum, 0);
+        };
+
+        const computeOpponents = (username) => {
+          return computeMatches(username)
+            .map((match) =>
+              username == match.Player1Username
+                ? match.Player2Username : match.Player1Username
+            )
+            .filter((opponent) => opponent);
+        };
+
+        const computeStrengthOfSchedule = (username) => {
+          const opponents = computeOpponents(username);
+          if (opponents.length === 0) {
+            return 0.0;
+          }
+          return (
+            opponents
+              .map(
+                (opponent) => Math.max(
+                  1 / 3, computePoints(opponent) / (3 * computeMatches(opponent).length),
+                )
+              )
+              .reduce(sum, 0)
+            / opponents.length
+          );
+        };
+
+        const computeRecord = (username) => {
+          return computeMatches(username)
+            .map((match) =>
+              match.GameDraws === 3
+                ? [0, 1, 0]
+                : username == match.Player1Username
+                  ? match.Player1GameAndByeWins == 2
+                    ? [1, 0, 0]
+                    : match.Player1GameAndByeWins == 1 ? [0, 0, 1] : [0, 1, 0]
+                  : match.Player2GameAndByeWins == 2
+                    ? [1, 0, 0]
+                    : match.Player2GameAndByeWins == 1 ? [0, 0, 1] : [0, 1, 0]
+            )
+            .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
+        };
+
+        const standings = players
+          .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
+          .map((player) => [
+            computePoints(player.Username),
+            computeGamesWon(player.Username),
+            Math.round(10e5 * computeStrengthOfSchedule(player.Username)) / 10e5,
+            0, // not supported by Melee
+            player.TeamId,
+            computeRecord(player.Username),
+            player.PlayerName,
+          ])
+          .toSorted((lhs, rhs) => {
+            if (lhs[0] > rhs[0]) { return -1; }
+            if (lhs[0] < rhs[0]) { return 1; }
+            if (lhs[1] > rhs[1]) { return -1; }
+            if (lhs[1] < rhs[1]) { return 1; }
+            if (lhs[2] > rhs[2]) { return -1; }
+            if (lhs[2] < rhs[2]) { return 1; }
+            if (lhs[3] > rhs[3]) { return -1; }
+            if (lhs[3] < rhs[3]) { return 1; }
+            if (lhs[4] < rhs[4]) { return -1; }
+            if (lhs[4] > rhs[4]) { return 1; }
+            return 0;
+          });
+
+        const standingsTable = document.createElement("table");
+        standingsTable.setAttribute("class", "table table-striped table-hover");
+
+        const standingsTableHeader = document.createElement("thead");
+        const standingsTableHeaderRow = standingsTableHeader.insertRow();
+        [
+          ["Rank", 10],
+          ["Player", 40],
+          ["Record", 10],
+          ["Points", 10],
+          ["Wins", 10],
+          ["SoS", 10],
+          ["LastWins", 10],
+        ].forEach((elem) => {
+          const [text, width] = elem;
+          const cell = document.createElement("th");
+          cell.setAttribute("style", `width: ${width}%`);
+          cell.appendChild(document.createTextNode(text))
+          standingsTableHeaderRow.appendChild(cell);
+        });
+        standingsTable.appendChild(standingsTableHeader);
+
+        const standingsTableBody = document.createElement("tbody");
+        standings.forEach((standing, index) => {
+          const rank = index + 1;
+          const [points, wins, sos, _lastWins, _teamId, record, name] = standing;
+          const row = standingsTableBody.insertRow();
+          for (text of [
+            rank,
+            name,
+            `${record[0]}-${record[1]}-${record[2]}`,
+            points,
+            wins,
+            `${(100 * sos).toFixed(5)}%`,
+            "", // not supported by Melee
+          ]) {
+            row.insertCell().appendChild(document.createTextNode(text));
+          }
+        });
+        standingsTable.appendChild(standingsTableBody);
+
+        standingsPane.appendChild(standingsTable);
+
         submitButton.blur();
       };
     </script>
