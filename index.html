@@ -35,5 +35,101 @@
       integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
       crossorigin="anonymous"
     ></script>
+    <script>
+      function handleFile(fileInput, validateItems) {
+        fileInput.parentNode.classList.remove("was-validated");
+
+        const files = fileInput.files;
+        switch (files.length) {
+          case 0:
+            return;
+          case 1: {
+            const playersFile = fileInput.files[0];
+            if (playersFile.type === "application/json") {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                let items = [];
+                try {
+                  items = JSON.parse(event.target.result);
+                } catch {
+                  fileInput.setCustomValidity("Invalid JSON");
+                  fileInput.parentNode.classList.add("was-validated");
+                  return;
+                }
+
+                fileInput.setCustomValidity(validateItems(items));
+                fileInput.parentNode.classList.add("was-validated");
+              };
+              reader.onerror = (event) => {
+                fileInput.setCustomValidity("Failed to read the file");
+                fileInput.parentNode.classList.add("was-validated");
+              };
+              reader.readAsText(playersFile);
+              return;
+            } else {
+              fileInput.setCustomValidity("Incorrect file type");
+            }
+            break;
+          }
+          default:
+            fileInput.setCustomValidity("Too many files");
+        }
+
+        fileInput.parentNode.classList.add("was-validated");
+      }
+
+      function validatePlayers(players) {
+        if (!Array.isArray(players)) {
+          return "Invalid JSON contents (expected array of players)";
+        }
+        for (property of ["Username", "PlayerName", "TeamId", "Status"]) {
+          if (!players.every((player) => Object.hasOwn(player, property))) {
+            return `Invalid JSON contents (missing "${property}" property)`;
+          }
+        }
+        return "";
+      }
+
+      const playersFileInput = document.getElementById("players-file-input");
+      playersFileInput.addEventListener(
+        "change", (event) => { handleFile(playersFileInput, validatePlayers) }
+      );
+
+      function validateMatches(matches) {
+        if (!Array.isArray(matches)) {
+          return "Invalid JSON contents (expected array of matches)";
+        }
+        for (property of [
+          "Player1Username",
+          "Player2Username",
+          "Player1GameAndByeWins",
+          "Player2GameAndByeWins",
+          "HasResults",
+          "GameDraws",
+        ]) {
+          if (!matches.every((match) => Object.hasOwn(match, property))) {
+            return `Invalid JSON contents (missing "${property}" property)`;
+          }
+        }
+        const invalidMatches = matches.filter(
+          (match) => match.Player1GameAndByeWins + match.Player2GameAndByeWins > 2
+        ).length;
+        if (invalidMatches !== 0) {
+          return (
+            `${invalidMatches} match${invalidMatches === 1 ? '' : 'es' } with invalid`
+            + ' result'
+          );
+        }
+        return "";
+      }
+
+      const matchesFileInput = document.getElementById("matches-file-input");
+      matchesFileInput.addEventListener(
+        "change", (event) => { handleFile(matchesFileInput, validateMatches) }
+      );
+
+      handleFile(playersFileInput, validatePlayers);
+      handleFile(matchesFileInput, validateMatches);
+    </script>
   </body>
 </html>
