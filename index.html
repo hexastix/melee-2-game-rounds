@@ -39,7 +39,7 @@
       crossorigin="anonymous"
     ></script>
     <script>
-      function handleFile(fileInput, validateItems) {
+      function handleFile(fileInput, validateItems, assignItems) {
         fileInput.parentNode.classList.remove("was-validated");
 
         const files = fileInput.files;
@@ -60,7 +60,11 @@
                   return;
                 }
 
-                fileInput.setCustomValidity(validateItems(items));
+                const validity = validateItems(items);
+                if (validity === "") {
+                  assignItems(items);
+                }
+                fileInput.setCustomValidity(validity);
                 fileInput.parentNode.classList.add("was-validated");
               };
               reader.onerror = (event) => {
@@ -93,9 +97,13 @@
         return "";
       }
 
+      var players = [];
+      const assignPlayers = (items) => { players = items; };
+
       const playersFileInput = document.getElementById("players-file-input");
       playersFileInput.addEventListener(
-        "change", (event) => { handleFile(playersFileInput, validatePlayers) }
+        "change",
+        (event) => { handleFile(playersFileInput, validatePlayers, assignPlayers) },
       );
 
       function validateMatches(matches) {
@@ -126,13 +134,17 @@
         return "";
       }
 
+      var matches = [];
+      const assignMatches = (items) => { matches = items; }
+
       const matchesFileInput = document.getElementById("matches-file-input");
       matchesFileInput.addEventListener(
-        "change", (event) => { handleFile(matchesFileInput, validateMatches) }
+        "change",
+        (event) => { handleFile(matchesFileInput, validateMatches, assignMatches) },
       );
 
-      handleFile(playersFileInput, validatePlayers);
-      handleFile(matchesFileInput, validateMatches);
+      handleFile(playersFileInput, validatePlayers, assignPlayers);
+      handleFile(matchesFileInput, validateMatches, assignMatches);
 
       const submitButton = document.getElementById("submit-button");
       submitButton.onclick = (event) => {
