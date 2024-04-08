@@ -136,6 +136,11 @@
 
       const submitButton = document.getElementById("submit-button");
       submitButton.onclick = (event) => {
+        playersFileInput.required = true;
+        playersFileInput.parentNode.classList.add("was-validated");
+        matchesFileInput.required = true;
+        matchesFileInput.parentNode.classList.add("was-validated");
+
         submitButton.blur();
       };
     </script>
