@@ -32,6 +32,16 @@
         </div>
       </div>
     </div>
+    <div class="container my-4">
+      <h2>Matches</h2>
+      <div class="bg-body-secondary">
+        <div id="matches-tabs" class="nav nav-pills justify-content-center">
+        </div>
+      </div>
+      <div id="matches-panes" class="tab-content">
+        <p>No matches</p>
+      </div>
+    </div>
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
@@ -153,6 +163,80 @@
         matchesFileInput.required = true;
         matchesFileInput.parentNode.classList.add("was-validated");
 
+        const matchesTabs = document.getElementById("matches-tabs");
+        matchesTabs.replaceChildren();
+
+        const matchesPanes = document.getElementById("matches-panes");
+        matchesPanes.replaceChildren();
+
+        if (matches.length === 0) {
+          const matchesText = document.createElement("p");
+          matchesText.appendChild(document.createTextNode("No matches"));
+          matchesPanes.replaceChildren(matchesText);
+
+          submitButton.blur();
+          return;
+        }
+
+        const roundNumbers = [... new Set(matches.map((match) => match.RoundNumber))];
+        roundNumbers.forEach((number, index) => {
+          const roundTab = document.createElement("button");
+          roundTab.setAttribute("type", "button");
+          roundTab.setAttribute("class", `nav-link my-3 ${index == 0 ? "active" : ""}`);
+          roundTab.setAttribute("data-bs-toggle", "pill");
+          roundTab.setAttribute("data-bs-target", `#round-${number}-pane`);
+          roundTab.appendChild(document.createTextNode(`Round ${number}`));
+          matchesTabs.appendChild(roundTab);
+
+          const roundPane = document.createElement("div");
+          roundPane.setAttribute("class", index == 0 ? "tab-pane active" : "tab-pane");
+          roundPane.setAttribute("id", `round-${number}-pane`);
+
+          const matchesTable = document.createElement("table");
+          matchesTable.setAttribute("class", "table table-striped table-hover");
+
+          const matchesTableHeader = document.createElement("thead");
+          const matchesTableHeaderRow = matchesTableHeader.insertRow();
+          [["Player 1", 40], ["Result", 20], ["Player 2", 40]].forEach((elem) => {
+            const [text, width] = elem;
+            const cell = document.createElement("th");
+            cell.setAttribute("style", `width: ${width}%`);
+            cell.appendChild(document.createTextNode(text))
+            matchesTableHeaderRow.appendChild(cell);
+          });
+          matchesTable.appendChild(matchesTableHeader);
+
+          const matchesTableBody = document.createElement("tbody");
+          matches.filter((match) => match.RoundNumber == number).forEach((match) => {
+            const row = matchesTableBody.insertRow();
+            const player1 = players.filter(
+              (player) => player.Username == match.Player1Username
+            )[0];
+            const player1Name = (
+              player1 ? player1.PlayerNameLastFirst : match.Player1Username
+            );
+            const player2 = players.filter(
+              (player) => player.Username == match.Player2Username
+            )[0];
+            const player2Name = (
+              player2 ? player2.PlayerNameLastFirst : match.Player2Username
+            );
+            const result = match.HasResults
+              ? `${match.Player1GameAndByeWins} - ${match.Player2GameAndByeWins}`
+              : "Not reported";
+            for (text of [
+              player1Name ? player1Name : "N/A (bye)",
+              result,
+              player2Name ? player2Name : "N/A (bye)",
+            ]) {
+              row.insertCell().appendChild(document.createTextNode(text));
+            }
+          });
+          matchesTable.appendChild(matchesTableBody);
+
+          roundPane.appendChild(matchesTable);
+          matchesPanes.appendChild(roundPane);
+        });
         submitButton.blur();
       };
     </script>
