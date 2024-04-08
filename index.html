@@ -27,6 +27,9 @@
           <label for="matches-file-input" class="form-label">Tournament matches as JSON file</label>
           <input type="file" accept="application/json" id="matches-file-input" class="form-control" />
         </div>
+        <div class="col d-flex align-items-end">
+          <button type="button" id="submit-button" class="form-control">Submit</button>
+        </div>
       </div>
     </div>
 
@@ -130,6 +133,11 @@
 
       handleFile(playersFileInput, validatePlayers);
       handleFile(matchesFileInput, validateMatches);
+
+      const submitButton = document.getElementById("submit-button");
+      submitButton.onclick = (event) => {
+        submitButton.blur();
+      };
     </script>
   </body>
 </html>
