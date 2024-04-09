@@ -291,11 +291,16 @@
           standingsPane.replaceChildren(standingsText);
 
           if (nextRoundPane) {
+            const pairingsHeader = document.createElement("h4");
+            pairingsHeader.setAttribute("class", "my-2");
+            pairingsHeader.appendChild(document.createTextNode("Pairings"));
+
             const pairingsText = document.createElement("p");
             pairingsText.appendChild(
               document.createTextNode("No pairings (missing player data)")
             );
-            nextRoundPane.replaceChildren(pairingsText);
+
+            nextRoundPane.replaceChildren(pairingsHeader, pairingsText);
           }
 
           submitButton.blur();
