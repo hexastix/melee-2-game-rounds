@@ -354,15 +354,15 @@
             player.PlayerName,
           ])
           .toSorted((lhs, rhs) => {
-            if (lhs[0] > rhs[0]) { return -1; }
+            if (lhs[0] > rhs[0]) { return -1; } // Points
             if (lhs[0] < rhs[0]) { return 1; }
-            if (lhs[1] > rhs[1]) { return -1; }
+            if (lhs[1] > rhs[1]) { return -1; } // Wins
             if (lhs[1] < rhs[1]) { return 1; }
-            if (lhs[2] > rhs[2]) { return -1; }
+            if (lhs[2] > rhs[2]) { return -1; } // SoS
             if (lhs[2] < rhs[2]) { return 1; }
             if (lhs[3] > rhs[3]) { return -1; }
             if (lhs[3] < rhs[3]) { return 1; }
-            if (lhs[4] < rhs[4]) { return -1; }
+            if (lhs[4] < rhs[4]) { return -1; } // TeamId
             if (lhs[4] > rhs[4]) { return 1; }
             return 0;
           });
