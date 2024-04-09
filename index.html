@@ -192,17 +192,30 @@
         }
 
         const roundNumbers = [... new Set(matches.map((match) => match.RoundNumber))];
+        const completedRoundNumbers = roundNumbers.filter(
+          (number) =>
+            matches
+              .filter((match) => match.RoundNumber === number)
+              .every((match) => match.HasResults)
+        );
+
         roundNumbers.forEach((number, index) => {
+          const active = number === roundNumbers[roundNumbers.length - 1]
+            && !(
+              roundNumbers.length === completedRoundNumbers.length
+                && players.length !== 0
+            );
+
           const roundTab = document.createElement("button");
           roundTab.setAttribute("type", "button");
-          roundTab.setAttribute("class", `nav-link my-3 ${index === 0 ? "active" : ""}`);
+          roundTab.setAttribute("class", `nav-link my-3 ${active ? "active" : ""}`);
           roundTab.setAttribute("data-bs-toggle", "pill");
           roundTab.setAttribute("data-bs-target", `#round-${number}-pane`);
           roundTab.appendChild(document.createTextNode(`Round ${number}`));
           roundsTabs.appendChild(roundTab);
 
           const roundPane = document.createElement("div");
-          roundPane.setAttribute("class", index === 0 ? "tab-pane active" : "tab-pane");
+          roundPane.setAttribute("class", `tab-pane ${active ? "active" : ""}`);
           roundPane.setAttribute("id", `round-${number}-pane`);
 
           const matchesTable = document.createElement("table");
@@ -251,26 +264,21 @@
           roundsPanes.appendChild(roundPane);
         });
 
-        const completedRoundNumbers = roundNumbers.filter(
-          (number) =>
-            matches
-              .filter((match) => match.RoundNumber === number)
-              .every((match) => match.HasResults)
-        );
-
         let nextRoundPane = null;
 
         if (roundNumbers.length === completedRoundNumbers.length) {
+          const active = players.length !== 0;
+
           const roundTab = document.createElement("button");
           roundTab.setAttribute("type", "button");
-          roundTab.setAttribute("class", "nav-link my-3");
+          roundTab.setAttribute("class", `nav-link my-3 ${active ? "active" : ""}`);
           roundTab.setAttribute("data-bs-toggle", "pill");
           roundTab.setAttribute("data-bs-target", "#next-round-pane");
           roundTab.appendChild(document.createTextNode("Next round"));
           roundsTabs.appendChild(roundTab);
 
           nextRoundPane = document.createElement("div");
-          nextRoundPane.setAttribute("class", "tab-pane");
+          nextRoundPane.setAttribute("class", `tab-pane ${active ? "active" : ""}`);
           nextRoundPane.setAttribute("id", "next-round-pane");
           roundsPanes.appendChild(nextRoundPane);
         }
