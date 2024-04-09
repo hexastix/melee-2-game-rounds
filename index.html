@@ -326,6 +326,26 @@
           );
         };
 
+        const computeLastWins = (username) => {
+          return computeMatches(username)
+            .map((match) =>
+              match.GameDraws === 3
+                ? [0, 0]
+                : username === match.Player1Username
+                  ? match.Player1GameAndByeWins === (
+                      match.Player1GameAndByeWins + match.Player2GameAndByeWins
+                    )
+                    ? [1, 1]
+                    : match.Player1GameAndByeWins === 0 ? [0, 0] : [0, 1]
+                  : match.Player2GameAndByeWins === (
+                      match.Player1GameAndByeWins + match.Player2GameAndByeWins
+                    )
+                    ? [1, 1]
+                    : match.Player2GameAndByeWins === 0 ? [0, 0] : [0, 1]
+            )
+            .reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0])
+        };
+
         const computeRecord = (username) => {
           return computeMatches(username)
             .map((match) =>
@@ -348,7 +368,7 @@
             computePoints(player.Username),
             computeGamesWon(player.Username),
             Math.round(10e5 * computeStrengthOfSchedule(player.Username)) / 10e5,
-            0, // not supported by Melee
+            computeLastWins(player.Username),
             player.TeamId,
             computeRecord(player.Username),
             player.PlayerName,
@@ -360,8 +380,10 @@
             if (lhs[1] < rhs[1]) { return 1; }
             if (lhs[2] > rhs[2]) { return -1; } // SoS
             if (lhs[2] < rhs[2]) { return 1; }
-            if (lhs[3] > rhs[3]) { return -1; }
-            if (lhs[3] < rhs[3]) { return 1; }
+            if ((lhs[3][0] + lhs[3][1]) / 2  > (rhs[3][0] + rhs[3][1]) / 2) {  // LastWins
+              return -1;
+            }
+            if ((lhs[3][0] + lhs[3][1]) / 2  < (rhs[3][0] + rhs[3][1]) / 2) { return 1; }
             if (lhs[4] < rhs[4]) { return -1; } // TeamId
             if (lhs[4] > rhs[4]) { return 1; }
             return 0;
@@ -392,7 +414,7 @@
         const standingsTableBody = document.createElement("tbody");
         standings.forEach((standing, index) => {
           const rank = index + 1;
-          const [points, wins, sos, _lastWins, _teamId, record, name] = standing;
+          const [points, wins, sos, lastWins, _teamId, record, name] = standing;
           const row = standingsTableBody.insertRow();
           for (text of [
             rank,
@@ -401,7 +423,7 @@
             points,
             wins,
             `${(100 * sos).toFixed(5)}%`,
-            "", // not supported by Melee
+            lastWins[0] === lastWins[1] ? lastWins[0] : `[${lastWins[0]}:${lastWins[1]}]`,
           ]) {
             row.insertCell().appendChild(document.createTextNode(text));
           }
