@@ -515,6 +515,33 @@
           pairingsTable.appendChild(pairingsTableBody);
 
           nextRoundPane.appendChild(pairingsTable);
+
+          const pairingsScriptHeader = document.createElement("h4");
+          pairingsScriptHeader.setAttribute("class", "my-2");
+          pairingsScriptHeader.appendChild(document.createTextNode("Pairings script"));
+          nextRoundPane.appendChild(pairingsScriptHeader);
+
+          const newPairings = pairings
+            .map((pairing) =>
+              JSON.stringify({
+                TableNumber: pairing[0],
+                Team1Id: pairing[1].TeamId,
+                Team1Name: "",
+                Team2Id: pairing[2] ? pairing[2].TeamId : null,
+                Team2Name: pairing[2] ? "" : "Bye",
+              })
+            )
+            .join(", ");
+          const pairingsScript = document.createElement("pre");
+          pairingsScript.setAttribute("style", "white-space: pre-wrap");
+          pairingsScript.setAttribute("class", "bg-body-secondary p-3");
+          pairingsScript.appendChild(document.createTextNode(
+            "(function(){$.post(\"/Tournament/UpdatePairings\", {id:" +
+            " $(\"#pairings-round-selector-container > .round-selector.active\")" +
+            `.data("id"), newPairings: [${newPairings}], deletedPairings: []},` +
+            " (response) => { if (response.Code) { console.log(response.Message); } })})()"
+          ));
+          nextRoundPane.appendChild(pairingsScript);
         }
 
         submitButton.blur();
