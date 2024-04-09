@@ -457,6 +457,66 @@
 
         standingsPane.appendChild(standingsTable);
 
+        if (nextRoundPane) {
+          const unpairedPlayers = players
+            .filter((player) => [1, 2].includes(player.Status))
+            .map((player) => [Math.random(), computePoints(player.Username), player])
+            .sort((lhs, rhs) => lhs[0] - rhs[0])
+            .sort((lhs, rhs) => rhs[1] - lhs[1])
+            .map((t) => t[2]);
+          let pairings = [];
+          let table = 1;
+          while (unpairedPlayers.length > 1) {
+            const player1 = unpairedPlayers.shift();
+            const player2 = unpairedPlayers.splice(
+              unpairedPlayers.findIndex(
+                (player) => !computeOpponents(player1.Username).includes(player.Username)
+              ),
+              1,
+            )[0];
+            pairings.push([table, player1, player2]);
+            table += 1;
+          }
+          if (unpairedPlayers.length === 1) {
+            pairings.unshift([null, unpairedPlayers[0], null]);
+          }
+
+          const pairingsHeader = document.createElement("h4");
+          pairingsHeader.setAttribute("class", "my-2");
+          pairingsHeader.appendChild(document.createTextNode("Pairings"));
+          nextRoundPane.appendChild(pairingsHeader);
+
+          const pairingsTable = document.createElement("table");
+          pairingsTable.setAttribute("class", "table table-striped table-hover");
+
+          const pairingsTableHeader = document.createElement("thead");
+          const pairingsTableHeaderRow = pairingsTableHeader.insertRow();
+          [["Table", 20], ["Player 1", 40], ["Player 2", 40]].forEach((elem) => {
+            const [text, width] = elem;
+            const cell = document.createElement("th");
+            cell.setAttribute("style", `width: ${width}%`);
+            cell.appendChild(document.createTextNode(text))
+            pairingsTableHeaderRow.appendChild(cell);
+          });
+          pairingsTable.appendChild(pairingsTableHeader);
+
+          const pairingsTableBody = document.createElement("tbody");
+          pairings.forEach((pairing, index) => {
+            const [table, player1, player2] = pairing;
+            const row = pairingsTableBody.insertRow();
+            for (text of [
+              table ? `${table}` : "-",
+              player1.PlayerNameLastFirst,
+              player2 ? player2.PlayerNameLastFirst : "N/A (bye)",
+            ]) {
+              row.insertCell().appendChild(document.createTextNode(text));
+            }
+          });
+          pairingsTable.appendChild(pairingsTableBody);
+
+          nextRoundPane.appendChild(pairingsTable);
+        }
+
         submitButton.blur();
       };
     </script>
