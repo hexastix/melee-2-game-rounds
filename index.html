@@ -251,6 +251,30 @@
           roundsPanes.appendChild(roundPane);
         });
 
+        const completedRoundNumbers = roundNumbers.filter(
+          (number) =>
+            matches
+              .filter((match) => match.RoundNumber === number)
+              .every((match) => match.HasResults)
+        );
+
+        let nextRoundPane = null;
+
+        if (roundNumbers.length === completedRoundNumbers.length) {
+          const roundTab = document.createElement("button");
+          roundTab.setAttribute("type", "button");
+          roundTab.setAttribute("class", "nav-link my-3");
+          roundTab.setAttribute("data-bs-toggle", "pill");
+          roundTab.setAttribute("data-bs-target", "#next-round-pane");
+          roundTab.appendChild(document.createTextNode("Next round"));
+          roundsTabs.appendChild(roundTab);
+
+          nextRoundPane = document.createElement("div");
+          nextRoundPane.setAttribute("class", "tab-pane");
+          nextRoundPane.setAttribute("id", "next-round-pane");
+          roundsPanes.appendChild(nextRoundPane);
+        }
+
         if (players.length === 0) {
           const standingsText = document.createElement("p");
           standingsText.appendChild(
@@ -258,16 +282,17 @@
           );
           standingsPane.replaceChildren(standingsText);
 
+          if (nextRoundPane) {
+            const pairingsText = document.createElement("p");
+            pairingsText.appendChild(
+              document.createTextNode("No pairings (missing player data)")
+            );
+            nextRoundPane.replaceChildren(pairingsText);
+          }
+
           submitButton.blur();
           return;
         }
-
-        const completedRoundNumbers = roundNumbers.filter(
-          (number) =>
-            matches
-              .filter((match) => match.RoundNumber === number)
-              .every((match) => match.HasResults)
-        );
 
         const sum = (a, b) => { return a + b; };
 
