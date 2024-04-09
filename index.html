@@ -195,14 +195,14 @@
         roundNumbers.forEach((number, index) => {
           const roundTab = document.createElement("button");
           roundTab.setAttribute("type", "button");
-          roundTab.setAttribute("class", `nav-link my-3 ${index == 0 ? "active" : ""}`);
+          roundTab.setAttribute("class", `nav-link my-3 ${index === 0 ? "active" : ""}`);
           roundTab.setAttribute("data-bs-toggle", "pill");
           roundTab.setAttribute("data-bs-target", `#round-${number}-pane`);
           roundTab.appendChild(document.createTextNode(`Round ${number}`));
           roundsTabs.appendChild(roundTab);
 
           const roundPane = document.createElement("div");
-          roundPane.setAttribute("class", index == 0 ? "tab-pane active" : "tab-pane");
+          roundPane.setAttribute("class", index === 0 ? "tab-pane active" : "tab-pane");
           roundPane.setAttribute("id", `round-${number}-pane`);
 
           const matchesTable = document.createElement("table");
@@ -220,16 +220,16 @@
           matchesTable.appendChild(matchesTableHeader);
 
           const matchesTableBody = document.createElement("tbody");
-          matches.filter((match) => match.RoundNumber == number).forEach((match) => {
+          matches.filter((match) => match.RoundNumber === number).forEach((match) => {
             const row = matchesTableBody.insertRow();
             const player1 = players.filter(
-              (player) => player.Username == match.Player1Username
+              (player) => player.Username === match.Player1Username
             )[0];
             const player1Name = (
               player1 ? player1.PlayerNameLastFirst : match.Player1Username
             );
             const player2 = players.filter(
-              (player) => player.Username == match.Player2Username
+              (player) => player.Username === match.Player2Username
             )[0];
             const player2Name = (
               player2 ? player2.PlayerNameLastFirst : match.Player2Username
@@ -265,7 +265,7 @@
         const completedRoundNumbers = roundNumbers.filter(
           (number) =>
             matches
-              .filter((match) => match.RoundNumber == number)
+              .filter((match) => match.RoundNumber === number)
               .every((match) => match.HasResults)
         );
 
@@ -284,9 +284,9 @@
             .map((match) =>
               match.GameDraws === 3
                 ? 0
-                : username == match.Player1Username
-                  ? match.Player1GameAndByeWins == 2 ? 3 : match.Player1GameAndByeWins
-                  : match.Player2GameAndByeWins == 2 ? 3 : match.Player2GameAndByeWins
+                : username === match.Player1Username
+                  ? match.Player1GameAndByeWins === 2 ? 3 : match.Player1GameAndByeWins
+                  : match.Player2GameAndByeWins === 2 ? 3 : match.Player2GameAndByeWins
             )
             .reduce(sum, 0);
         };
@@ -294,7 +294,7 @@
         const computeGamesWon = (username) => {
           return computeMatches(username)
             .map((match) =>
-              username == match.Player1Username
+              username === match.Player1Username
                 ? match.Player1GameAndByeWins : match.Player2GameAndByeWins
             )
             .reduce(sum, 0);
@@ -303,7 +303,7 @@
         const computeOpponents = (username) => {
           return computeMatches(username)
             .map((match) =>
-              username == match.Player1Username
+              username === match.Player1Username
                 ? match.Player2Username : match.Player1Username
             )
             .filter((opponent) => opponent);
@@ -331,13 +331,13 @@
             .map((match) =>
               match.GameDraws === 3
                 ? [0, 1, 0]
-                : username == match.Player1Username
-                  ? match.Player1GameAndByeWins == 2
+                : username === match.Player1Username
+                  ? match.Player1GameAndByeWins === 2
                     ? [1, 0, 0]
-                    : match.Player1GameAndByeWins == 1 ? [0, 0, 1] : [0, 1, 0]
-                  : match.Player2GameAndByeWins == 2
+                    : match.Player1GameAndByeWins === 1 ? [0, 0, 1] : [0, 1, 0]
+                  : match.Player2GameAndByeWins === 2
                     ? [1, 0, 0]
-                    : match.Player2GameAndByeWins == 1 ? [0, 0, 1] : [0, 1, 0]
+                    : match.Player2GameAndByeWins === 1 ? [0, 0, 1] : [0, 1, 0]
             )
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
         };
