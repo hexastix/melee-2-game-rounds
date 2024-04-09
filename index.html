@@ -35,10 +35,10 @@
     <div class="container my-4">
       <h2>Matches</h2>
       <div class="bg-body-secondary">
-        <div id="matches-tabs" class="nav nav-pills justify-content-center">
+        <div id="rounds-tabs" class="nav nav-pills justify-content-center">
         </div>
       </div>
-      <div id="matches-panes" class="tab-content">
+      <div id="rounds-panes" class="tab-content">
         <p>No matches</p>
       </div>
     </div>
@@ -169,11 +169,11 @@
         matchesFileInput.required = true;
         matchesFileInput.parentNode.classList.add("was-validated");
 
-        const matchesTabs = document.getElementById("matches-tabs");
-        matchesTabs.replaceChildren();
+        const roundsTabs = document.getElementById("rounds-tabs");
+        roundsTabs.replaceChildren();
 
-        const matchesPanes = document.getElementById("matches-panes");
-        matchesPanes.replaceChildren();
+        const roundsPanes = document.getElementById("rounds-panes");
+        roundsPanes.replaceChildren();
 
         const standingsPane = document.getElementById("standings-pane");
         standingsPane.replaceChildren();
@@ -181,7 +181,7 @@
         if (matches.length === 0) {
           const matchesText = document.createElement("p");
           matchesText.appendChild(document.createTextNode("No matches"));
-          matchesPanes.replaceChildren(matchesText);
+          roundsPanes.replaceChildren(matchesText);
 
           const standingsText = document.createElement("p");
           standingsText.appendChild(document.createTextNode("No standings"));
@@ -199,7 +199,7 @@
           roundTab.setAttribute("data-bs-toggle", "pill");
           roundTab.setAttribute("data-bs-target", `#round-${number}-pane`);
           roundTab.appendChild(document.createTextNode(`Round ${number}`));
-          matchesTabs.appendChild(roundTab);
+          roundsTabs.appendChild(roundTab);
 
           const roundPane = document.createElement("div");
           roundPane.setAttribute("class", index == 0 ? "tab-pane active" : "tab-pane");
@@ -248,7 +248,7 @@
           matchesTable.appendChild(matchesTableBody);
 
           roundPane.appendChild(matchesTable);
-          matchesPanes.appendChild(roundPane);
+          roundsPanes.appendChild(roundPane);
         });
 
         if (players.length === 0) {
