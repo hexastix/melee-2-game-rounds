@@ -552,7 +552,9 @@
             "(function(){$.post(\"/Tournament/UpdatePairings\", {id:" +
             " $(\"#pairings-round-selector-container > .round-selector.active\")" +
             `.data("id"), newPairings: [${newPairings}], deletedPairings: []},` +
-            " (response) => { if (response.Code) { console.log(response.Message); } })})()"
+            " (response) => { Flattsware.notify.handleResponse(response, (response) =>" +
+            " { updateTournamentMetrics(true), Flattsware.showSnackbarAlert(" +
+            "response.Message) }) }).fail(Flattsware.showFail) })()"
           ));
           nextRoundPane.appendChild(pairingsScript);
         }
