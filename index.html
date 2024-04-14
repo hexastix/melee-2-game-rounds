@@ -549,12 +549,12 @@
           pairingsScript.setAttribute("style", "white-space: pre-wrap");
           pairingsScript.setAttribute("class", "bg-body-secondary p-3");
           pairingsScript.appendChild(document.createTextNode(
-            "(function(){$.post(\"/Tournament/UpdatePairings\", {id:" +
-            " $(\"#pairings-round-selector-container > .round-selector.active\")" +
-            `.data("id"), newPairings: [${newPairings}], deletedPairings: []},` +
-            " (response) => { Flattsware.notify.handleResponse(response, (response) =>" +
-            " { updateTournamentMetrics(true), Flattsware.showSnackbarAlert(" +
-            "response.Message) }) }).fail(Flattsware.showFail) })()"
+            "(function(){$.post(\"/Tournament/UpdatePairings\", {id:"
+            + " $(\"#pairings-round-selector-container > .round-selector.active\")"
+            + `.data("id"), newPairings: [${newPairings}], deletedPairings: []},`
+            + " (response) => { Flattsware.notify.handleResponse(response, (response) =>"
+            + " { updateTournamentMetrics(true), Flattsware.showSnackbarAlert("
+            + "response.Message) }) }).fail(Flattsware.showFail) })()"
           ));
           nextRoundPane.appendChild(pairingsScript);
         }
