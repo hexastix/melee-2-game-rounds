@@ -409,7 +409,7 @@
             computeLastWins(player.Username),
             player.TeamId,
             computeRecord(player.Username),
-            player.PlayerName,
+            player.PlayerNameLastFirst,
           ])
           .toSorted((lhs, rhs) => {
             if (lhs[0] > rhs[0]) { return -1; } // Points
