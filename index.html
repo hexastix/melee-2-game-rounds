@@ -402,76 +402,79 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
         };
 
-        const standings = allPlayers
-          .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
-          .map((player) => [
-            computePoints(allMatches, player.Username),
-            computeGamesWon(allMatches, player.Username),
-            Math.round(10e5 * computeStrengthOfSchedule(allMatches, player.Username))
-              / 10e5,
-            computeLastWins(allMatches, player.Username),
-            player.TeamId,
-            computeRecord(allMatches, player.Username),
-            player.PlayerNameLastFirst,
-          ])
-          .toSorted((lhs, rhs) => {
-            if (lhs[0] > rhs[0]) { return -1; } // Points
-            if (lhs[0] < rhs[0]) { return 1; }
-            if (lhs[1] > rhs[1]) { return -1; } // Wins
-            if (lhs[1] < rhs[1]) { return 1; }
-            if (lhs[2] > rhs[2]) { return -1; } // SoS
-            if (lhs[2] < rhs[2]) { return 1; }
-            if ((lhs[3][0] + lhs[3][1]) / 2  > (rhs[3][0] + rhs[3][1]) / 2) {  // LastWins
-              return -1;
-            }
-            if ((lhs[3][0] + lhs[3][1]) / 2  < (rhs[3][0] + rhs[3][1]) / 2) { return 1; }
-            if (lhs[4] < rhs[4]) { return -1; } // TeamId
-            if (lhs[4] > rhs[4]) { return 1; }
-            return 0;
+          const standings = allPlayers
+            .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
+            .map((player) => [
+              computePoints(allMatches, player.Username),
+              computeGamesWon(allMatches, player.Username),
+              Math.round(10e5 * computeStrengthOfSchedule(allMatches, player.Username))
+                / 10e5,
+              computeLastWins(allMatches, player.Username),
+              player.TeamId,
+              computeRecord(allMatches, player.Username),
+              player.PlayerNameLastFirst,
+            ])
+            .toSorted((lhs, rhs) => {
+              if (lhs[0] > rhs[0]) { return -1; } // Points
+              if (lhs[0] < rhs[0]) { return 1; }
+              if (lhs[1] > rhs[1]) { return -1; } // Wins
+              if (lhs[1] < rhs[1]) { return 1; }
+              if (lhs[2] > rhs[2]) { return -1; } // SoS
+              if (lhs[2] < rhs[2]) { return 1; }
+              // LastWins
+              if ((lhs[3][0] + lhs[3][1]) / 2  > (rhs[3][0] + rhs[3][1]) / 2) {
+                return -1;
+              }
+              if ((lhs[3][0] + lhs[3][1]) / 2  < (rhs[3][0] + rhs[3][1]) / 2) {
+                return 1;
+              }
+              if (lhs[4] < rhs[4]) { return -1; } // TeamId
+              if (lhs[4] > rhs[4]) { return 1; }
+              return 0;
+            });
+
+          const standingsTable = document.createElement("table");
+          standingsTable.setAttribute("class", "table table-striped table-hover");
+
+          const standingsTableHeader = document.createElement("thead");
+          const standingsTableHeaderRow = standingsTableHeader.insertRow();
+          [
+            ["Rank", 10],
+            ["Player", 40],
+            ["Record", 10],
+            ["Points", 10],
+            ["Wins", 10],
+            ["SoS", 10],
+            ["LastWins", 10],
+          ].forEach((elem) => {
+            const [text, width] = elem;
+            const cell = document.createElement("th");
+            cell.setAttribute("style", `width: ${width}%`);
+            cell.appendChild(document.createTextNode(text))
+            standingsTableHeaderRow.appendChild(cell);
           });
+          standingsTable.appendChild(standingsTableHeader);
 
-        const standingsTable = document.createElement("table");
-        standingsTable.setAttribute("class", "table table-striped table-hover");
+          const standingsTableBody = document.createElement("tbody");
+          standings.forEach((standing, index) => {
+            const rank = index + 1;
+            const [points, wins, sos, lastWins, _teamId, record, name] = standing;
+            const row = standingsTableBody.insertRow();
+            for (text of [
+              rank,
+              name,
+              `${record[0]}-${record[1]}-${record[2]}`,
+              points,
+              wins,
+              `${(100 * sos).toFixed(5)}%`,
+              lastWins[0] === lastWins[1] ? lastWins[0] : `[${lastWins[0]}:${lastWins[1]}]`,
+            ]) {
+              row.insertCell().appendChild(document.createTextNode(text));
+            }
+          });
+          standingsTable.appendChild(standingsTableBody);
 
-        const standingsTableHeader = document.createElement("thead");
-        const standingsTableHeaderRow = standingsTableHeader.insertRow();
-        [
-          ["Rank", 10],
-          ["Player", 40],
-          ["Record", 10],
-          ["Points", 10],
-          ["Wins", 10],
-          ["SoS", 10],
-          ["LastWins", 10],
-        ].forEach((elem) => {
-          const [text, width] = elem;
-          const cell = document.createElement("th");
-          cell.setAttribute("style", `width: ${width}%`);
-          cell.appendChild(document.createTextNode(text))
-          standingsTableHeaderRow.appendChild(cell);
-        });
-        standingsTable.appendChild(standingsTableHeader);
-
-        const standingsTableBody = document.createElement("tbody");
-        standings.forEach((standing, index) => {
-          const rank = index + 1;
-          const [points, wins, sos, lastWins, _teamId, record, name] = standing;
-          const row = standingsTableBody.insertRow();
-          for (text of [
-            rank,
-            name,
-            `${record[0]}-${record[1]}-${record[2]}`,
-            points,
-            wins,
-            `${(100 * sos).toFixed(5)}%`,
-            lastWins[0] === lastWins[1] ? lastWins[0] : `[${lastWins[0]}:${lastWins[1]}]`,
-          ]) {
-            row.insertCell().appendChild(document.createTextNode(text));
-          }
-        });
-        standingsTable.appendChild(standingsTableBody);
-
-        standingsPane.appendChild(standingsTable);
+          standingsPane.appendChild(standingsTable);
 
         if (nextRoundPane) {
           const unpairedPlayers = allPlayers
