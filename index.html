@@ -318,9 +318,7 @@
 
         const computeMatches = (matches, username) => {
           return matches.filter(
-            (match) =>
-              completedRoundNumbers.includes(match.RoundNumber)
-                && [match.Player1Username, match.Player2Username].includes(username)
+            (match) => [match.Player1Username, match.Player2Username].includes(username)
           )
         }
 
@@ -410,16 +408,17 @@
         };
 
         completedRoundNumbers.forEach((number) => {
+          const matches = allMatches.filter((match) => match.RoundNumber <= number);
           const standings = allPlayers
             .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
             .map((player) => [
-              computePoints(allMatches, player.Username),
-              computeGamesWon(allMatches, player.Username),
-              Math.round(10e5 * computeStrengthOfSchedule(allMatches, player.Username))
+              computePoints(matches, player.Username),
+              computeGamesWon(matches, player.Username),
+              Math.round(10e5 * computeStrengthOfSchedule(matches, player.Username))
                 / 10e5,
-              computeLastWins(allMatches, player.Username),
+              computeLastWins(matches, player.Username),
               player.TeamId,
-              computeRecord(allMatches, player.Username),
+              computeRecord(matches, player.Username),
               player.PlayerNameLastFirst,
             ])
             .toSorted((lhs, rhs) => {
