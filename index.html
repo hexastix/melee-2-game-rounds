@@ -41,10 +41,10 @@
     <div class="container my-4">
       <h2>Matches</h2>
       <div class="bg-body-secondary">
-        <div id="rounds-tabs" class="nav nav-pills justify-content-center">
+        <div id="matches-tabs" class="nav nav-pills justify-content-center">
         </div>
       </div>
-      <div id="rounds-panes" class="tab-content">
+      <div id="matches-panes" class="tab-content">
         <p>No matches</p>
       </div>
     </div>
@@ -169,11 +169,11 @@
         matchesFileInput.required = true;
         matchesFileInput.parentNode.classList.add("was-validated");
 
-        const roundsTabs = document.getElementById("rounds-tabs");
-        roundsTabs.replaceChildren();
+        const matchesTabs = document.getElementById("matches-tabs");
+        matchesTabs.replaceChildren();
 
-        const roundsPanes = document.getElementById("rounds-panes");
-        roundsPanes.replaceChildren();
+        const matchesPanes = document.getElementById("matches-panes");
+        matchesPanes.replaceChildren();
 
         const standingsPane = document.getElementById("standings-pane");
         standingsPane.replaceChildren();
@@ -181,7 +181,7 @@
         if (allMatches.length === 0) {
           const matchesText = document.createElement("p");
           matchesText.appendChild(document.createTextNode("No matches"));
-          roundsPanes.replaceChildren(matchesText);
+          matchesPanes.replaceChildren(matchesText);
 
           const standingsText = document.createElement("p");
           standingsText.appendChild(document.createTextNode("No standings"));
@@ -210,13 +210,13 @@
           roundTab.setAttribute("type", "button");
           roundTab.setAttribute("class", `nav-link my-3 ${active ? "active" : ""}`);
           roundTab.setAttribute("data-bs-toggle", "pill");
-          roundTab.setAttribute("data-bs-target", `#round-${number}-pane`);
+          roundTab.setAttribute("data-bs-target", `#matches-round-${number}-pane`);
           roundTab.appendChild(document.createTextNode(`Round ${number}`));
-          roundsTabs.appendChild(roundTab);
+          matchesTabs.appendChild(roundTab);
 
           const roundPane = document.createElement("div");
           roundPane.setAttribute("class", `tab-pane ${active ? "active" : ""}`);
-          roundPane.setAttribute("id", `round-${number}-pane`);
+          roundPane.setAttribute("id", `matches-round-${number}-pane`);
 
           const matchesTable = document.createElement("table");
           matchesTable.setAttribute("class", "table table-striped table-hover");
@@ -261,7 +261,7 @@
           matchesTable.appendChild(matchesTableBody);
 
           roundPane.appendChild(matchesTable);
-          roundsPanes.appendChild(roundPane);
+          matchesPanes.appendChild(roundPane);
         });
 
         let nextRoundPane = null;
@@ -273,14 +273,14 @@
           roundTab.setAttribute("type", "button");
           roundTab.setAttribute("class", `nav-link my-3 ${active ? "active" : ""}`);
           roundTab.setAttribute("data-bs-toggle", "pill");
-          roundTab.setAttribute("data-bs-target", "#next-round-pane");
+          roundTab.setAttribute("data-bs-target", "#matches-next-round-pane");
           roundTab.appendChild(document.createTextNode("Next round"));
-          roundsTabs.appendChild(roundTab);
+          matchesTabs.appendChild(roundTab);
 
           nextRoundPane = document.createElement("div");
           nextRoundPane.setAttribute("class", `tab-pane ${active ? "active" : ""}`);
-          nextRoundPane.setAttribute("id", "next-round-pane");
-          roundsPanes.appendChild(nextRoundPane);
+          nextRoundPane.setAttribute("id", "matches-next-round-pane");
+          matchesPanes.appendChild(nextRoundPane);
         }
 
         if (allPlayers.length === 0) {
