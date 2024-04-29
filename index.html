@@ -34,7 +34,11 @@
     </div>
     <div class="container my-4">
       <h2>Standings</h2>
-      <div id="standings-pane" class="overflow-x-auto">
+      <div class="bg-body-secondary">
+        <div id="standings-tabs" class="nav nav-pills justify-content-center">
+        </div>
+      </div>
+      <div id="standings-panes" class="overflow-x-auto tab-content">
         <p>No standings</p>
       </div>
     </div>
@@ -175,8 +179,11 @@
         const matchesPanes = document.getElementById("matches-panes");
         matchesPanes.replaceChildren();
 
-        const standingsPane = document.getElementById("standings-pane");
-        standingsPane.replaceChildren();
+        const standingsTabs = document.getElementById("standings-tabs")
+        standingsTabs.replaceChildren();
+
+        const standingsPanes = document.getElementById("standings-panes");
+        standingsPanes.replaceChildren();
 
         if (allMatches.length === 0) {
           const matchesText = document.createElement("p");
@@ -185,7 +192,7 @@
 
           const standingsText = document.createElement("p");
           standingsText.appendChild(document.createTextNode("No standings"));
-          standingsPane.replaceChildren(standingsText);
+          standingsPanes.replaceChildren(standingsText);
 
           submitButton.blur();
           return;
@@ -288,7 +295,7 @@
           standingsText.appendChild(
             document.createTextNode("No standings (missing player data)")
           );
-          standingsPane.replaceChildren(standingsText);
+          standingsPanes.replaceChildren(standingsText);
 
           if (nextRoundPane) {
             const pairingsHeader = document.createElement("h4");
@@ -402,6 +409,7 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
         };
 
+        completedRoundNumbers.forEach((number) => {
           const standings = allPlayers
             .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
             .map((player) => [
@@ -432,6 +440,21 @@
               if (lhs[4] > rhs[4]) { return 1; }
               return 0;
             });
+
+          const active =
+            number === completedRoundNumbers[completedRoundNumbers.length - 1];
+
+          const roundTab = document.createElement("button");
+          roundTab.setAttribute("type", "button");
+          roundTab.setAttribute("class", `nav-link my-3 ${active ? "active" : ""}`);
+          roundTab.setAttribute("data-bs-toggle", "pill");
+          roundTab.setAttribute("data-bs-target", `#standings-round-${number}-pane`);
+          roundTab.appendChild(document.createTextNode(`Round ${number}`));
+          standingsTabs.appendChild(roundTab);
+
+          const roundPane = document.createElement("div");
+          roundPane.setAttribute("class", `tab-pane ${active ? "active" : ""}`);
+          roundPane.setAttribute("id", `standings-round-${number}-pane`);
 
           const standingsTable = document.createElement("table");
           standingsTable.setAttribute("class", "table table-striped table-hover");
@@ -474,7 +497,9 @@
           });
           standingsTable.appendChild(standingsTableBody);
 
-          standingsPane.appendChild(standingsTable);
+          roundPane.appendChild(standingsTable);
+          standingsPanes.appendChild(roundPane);
+        });
 
         if (nextRoundPane) {
           const unpairedPlayers = allPlayers
