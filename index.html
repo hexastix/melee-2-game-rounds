@@ -409,18 +409,31 @@
 
         completedRoundNumbers.forEach((number) => {
           const matches = allMatches.filter((match) => match.RoundNumber <= number);
-          const standings = allPlayers
-            .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
-            .map((player) => [
-              computePoints(matches, player.Username),
-              computeGamesWon(matches, player.Username),
-              Math.round(10e5 * computeStrengthOfSchedule(matches, player.Username))
-                / 10e5,
-              computeLastWins(matches, player.Username),
-              player.TeamId,
-              computeRecord(matches, player.Username),
-              player.PlayerNameLastFirst,
-            ])
+          let playerUsernames = new Set();
+          matches.forEach((match) => {
+            if (match.Player1Username) {
+              playerUsernames.add(match.Player1Username);
+            }
+            if (match.Player2Username) {
+              playerUsernames.add(match.Player2Username);
+            }
+          });
+          const standings = Array.from(playerUsernames)
+            .map((username) => {
+              const player = allPlayers.filter(
+                (player) => player.Username === username
+              )[0];
+              return [
+                computePoints(matches, player.Username),
+                computeGamesWon(matches, player.Username),
+                Math.round(10e5 * computeStrengthOfSchedule(matches, player.Username))
+                  / 10e5,
+                computeLastWins(matches, player.Username),
+                player.TeamId,
+                computeRecord(matches, player.Username),
+                player.PlayerNameLastFirst,
+              ]
+            })
             .toSorted((lhs, rhs) => {
               if (lhs[0] > rhs[0]) { return -1; } // Points
               if (lhs[0] < rhs[0]) { return 1; }
