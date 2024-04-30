@@ -309,16 +309,16 @@
 
         const sum = (a, b) => { return a + b; };
 
-        const computeMatches = (username) => {
-          return allMatches.filter(
+        const computeMatches = (matches, username) => {
+          return matches.filter(
             (match) =>
               completedRoundNumbers.includes(match.RoundNumber)
                 && [match.Player1Username, match.Player2Username].includes(username)
           )
         }
 
-        const computePoints = (username) => {
-          return computeMatches(username)
+        const computePoints = (matches, username) => {
+          return computeMatches(matches, username)
             .map((match) =>
               match.GameDraws === 3
                 ? 0
@@ -329,8 +329,8 @@
             .reduce(sum, 0);
         };
 
-        const computeGamesWon = (username) => {
-          return computeMatches(username)
+        const computeGamesWon = (matches, username) => {
+          return computeMatches(matches, username)
             .map((match) =>
               username === match.Player1Username
                 ? match.Player1GameAndByeWins : match.Player2GameAndByeWins
@@ -338,8 +338,8 @@
             .reduce(sum, 0);
         };
 
-        const computeOpponents = (username) => {
-          return computeMatches(username)
+        const computeOpponents = (matches, username) => {
+          return computeMatches(matches, username)
             .map((match) =>
               username === match.Player1Username
                 ? match.Player2Username : match.Player1Username
@@ -347,8 +347,8 @@
             .filter((opponent) => opponent);
         };
 
-        const computeStrengthOfSchedule = (username) => {
-          const opponents = computeOpponents(username);
+        const computeStrengthOfSchedule = (matches, username) => {
+          const opponents = computeOpponents(matches, username);
           if (opponents.length === 0) {
             return 0.0;
           }
@@ -356,7 +356,9 @@
             opponents
               .map(
                 (opponent) => Math.max(
-                  1 / 3, computePoints(opponent) / (3 * computeMatches(opponent).length),
+                  1 / 3,
+                  computePoints(matches, opponent)
+                    / (3 * computeMatches(matches, opponent).length),
                 )
               )
               .reduce(sum, 0)
@@ -364,8 +366,8 @@
           );
         };
 
-        const computeLastWins = (username) => {
-          return computeMatches(username)
+        const computeLastWins = (matches, username) => {
+          return computeMatches(matches, username)
             .map((match) =>
               match.GameDraws === 3
                 ? [0, 0]
@@ -384,8 +386,8 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0])
         };
 
-        const computeRecord = (username) => {
-          return computeMatches(username)
+        const computeRecord = (matches, username) => {
+          return computeMatches(matches, username)
             .map((match) =>
               match.GameDraws === 3
                 ? [0, 1, 0]
@@ -403,12 +405,13 @@
         const standings = allPlayers
           .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
           .map((player) => [
-            computePoints(player.Username),
-            computeGamesWon(player.Username),
-            Math.round(10e5 * computeStrengthOfSchedule(player.Username)) / 10e5,
-            computeLastWins(player.Username),
+            computePoints(allMatches, player.Username),
+            computeGamesWon(allMatches, player.Username),
+            Math.round(10e5 * computeStrengthOfSchedule(allMatches, player.Username))
+              / 10e5,
+            computeLastWins(allMatches, player.Username),
             player.TeamId,
-            computeRecord(player.Username),
+            computeRecord(allMatches, player.Username),
             player.PlayerNameLastFirst,
           ])
           .toSorted((lhs, rhs) => {
@@ -473,7 +476,9 @@
         if (nextRoundPane) {
           const unpairedPlayers = allPlayers
             .filter((player) => [1, 2].includes(player.Status))
-            .map((player) => [Math.random(), computePoints(player.Username), player])
+            .map((player) =>
+              [Math.random(), computePoints(allMatches, player.Username), player]
+            )
             .sort((lhs, rhs) => lhs[0] - rhs[0])
             .sort((lhs, rhs) => rhs[1] - lhs[1])
             .map((t) => t[2]);
@@ -483,7 +488,9 @@
             const player1 = unpairedPlayers.shift();
             const player2 = unpairedPlayers.splice(
               unpairedPlayers.findIndex(
-                (player) => !computeOpponents(player1.Username).includes(player.Username)
+                (player) => !computeOpponents(
+                  allMatches, player1.Username
+                ).includes(player.Username)
               ),
               1,
             )[0];
