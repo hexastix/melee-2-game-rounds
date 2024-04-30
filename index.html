@@ -113,13 +113,13 @@
         return "";
       }
 
-      var players = [];
-      const assignPlayers = (items) => { players = items; };
+      var allPlayers = [];
+      const assignAllPlayers = (items) => { allPlayers = items; };
 
       const playersFileInput = document.getElementById("players-file-input");
       playersFileInput.addEventListener(
         "change",
-        (event) => { handleFile(playersFileInput, validatePlayers, assignPlayers) },
+        (event) => { handleFile(playersFileInput, validatePlayers, assignAllPlayers) },
       );
 
       function validateMatches(matches) {
@@ -150,17 +150,17 @@
         return "";
       }
 
-      var matches = [];
-      const assignMatches = (items) => { matches = items; }
+      var allMatches = [];
+      const assignAllMatches = (items) => { allMatches = items; }
 
       const matchesFileInput = document.getElementById("matches-file-input");
       matchesFileInput.addEventListener(
         "change",
-        (event) => { handleFile(matchesFileInput, validateMatches, assignMatches) },
+        (event) => { handleFile(matchesFileInput, validateMatches, assignAllMatches) },
       );
 
-      handleFile(playersFileInput, validatePlayers, assignPlayers);
-      handleFile(matchesFileInput, validateMatches, assignMatches);
+      handleFile(playersFileInput, validatePlayers, assignAllPlayers);
+      handleFile(matchesFileInput, validateMatches, assignAllMatches);
 
       const submitButton = document.getElementById("submit-button");
       submitButton.onclick = (event) => {
@@ -178,7 +178,7 @@
         const standingsPane = document.getElementById("standings-pane");
         standingsPane.replaceChildren();
 
-        if (matches.length === 0) {
+        if (allMatches.length === 0) {
           const matchesText = document.createElement("p");
           matchesText.appendChild(document.createTextNode("No matches"));
           roundsPanes.replaceChildren(matchesText);
@@ -191,10 +191,10 @@
           return;
         }
 
-        const roundNumbers = [... new Set(matches.map((match) => match.RoundNumber))];
+        const roundNumbers = [... new Set(allMatches.map((match) => match.RoundNumber))];
         const completedRoundNumbers = roundNumbers.filter(
           (number) =>
-            matches
+            allMatches
               .filter((match) => match.RoundNumber === number)
               .every((match) => match.HasResults)
         );
@@ -203,7 +203,7 @@
           const active = number === roundNumbers[roundNumbers.length - 1]
             && !(
               roundNumbers.length === completedRoundNumbers.length
-                && players.length !== 0
+                && allPlayers.length !== 0
             );
 
           const roundTab = document.createElement("button");
@@ -233,15 +233,15 @@
           matchesTable.appendChild(matchesTableHeader);
 
           const matchesTableBody = document.createElement("tbody");
-          matches.filter((match) => match.RoundNumber === number).forEach((match) => {
+          allMatches.filter((match) => match.RoundNumber === number).forEach((match) => {
             const row = matchesTableBody.insertRow();
-            const player1 = players.filter(
+            const player1 = allPlayers.filter(
               (player) => player.Username === match.Player1Username
             )[0];
             const player1Name = (
               player1 ? player1.PlayerNameLastFirst : match.Player1Username
             );
-            const player2 = players.filter(
+            const player2 = allPlayers.filter(
               (player) => player.Username === match.Player2Username
             )[0];
             const player2Name = (
@@ -267,7 +267,7 @@
         let nextRoundPane = null;
 
         if (roundNumbers.length === completedRoundNumbers.length) {
-          const active = players.length !== 0;
+          const active = allPlayers.length !== 0;
 
           const roundTab = document.createElement("button");
           roundTab.setAttribute("type", "button");
@@ -283,7 +283,7 @@
           roundsPanes.appendChild(nextRoundPane);
         }
 
-        if (players.length === 0) {
+        if (allPlayers.length === 0) {
           const standingsText = document.createElement("p");
           standingsText.appendChild(
             document.createTextNode("No standings (missing player data)")
@@ -310,7 +310,7 @@
         const sum = (a, b) => { return a + b; };
 
         const computeMatches = (username) => {
-          return matches.filter(
+          return allMatches.filter(
             (match) =>
               completedRoundNumbers.includes(match.RoundNumber)
                 && [match.Player1Username, match.Player2Username].includes(username)
@@ -400,7 +400,7 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
         };
 
-        const standings = players
+        const standings = allPlayers
           .filter((player) => [1, 2, 3, 4, 8, 9, 10].includes(player.Status))
           .map((player) => [
             computePoints(player.Username),
@@ -471,7 +471,7 @@
         standingsPane.appendChild(standingsTable);
 
         if (nextRoundPane) {
-          const unpairedPlayers = players
+          const unpairedPlayers = allPlayers
             .filter((player) => [1, 2].includes(player.Status))
             .map((player) => [Math.random(), computePoints(player.Username), player])
             .sort((lhs, rhs) => lhs[0] - rhs[0])
