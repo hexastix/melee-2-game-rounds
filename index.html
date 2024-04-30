@@ -105,7 +105,7 @@
         if (!Array.isArray(players)) {
           return "Invalid JSON contents (expected array of players)";
         }
-        for (property of ["Username", "PlayerName", "TeamId", "Status"]) {
+        for (property of ["Username", "PlayerNameLastFirst", "TeamId", "Status"]) {
           if (!players.every((player) => Object.hasOwn(player, property))) {
             return `Invalid JSON contents (missing "${property}" property)`;
           }
