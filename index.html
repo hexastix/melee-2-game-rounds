@@ -320,7 +320,7 @@
           return matches.filter(
             (match) => [match.Player1Username, match.Player2Username].includes(username)
           )
-        }
+        };
 
         const computePoints = (matches, username) => {
           return computeMatches(matches, username)
