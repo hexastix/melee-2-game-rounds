@@ -531,8 +531,10 @@
         });
 
         if (nextRoundPane) {
-          const unpairedPlayers = allPlayers
-            .filter((player) => [1, 2].includes(player.Status))
+          const activePlayers = allPlayers.filter(
+            (player) => [1, 2].includes(player.Status)
+          );
+          const unpairedPlayers = activePlayers
             .map((player) =>
               [Math.random(), computePoints(allMatches, player.Username), player]
             )
