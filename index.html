@@ -345,13 +345,14 @@
 
         const computePoints = (matches, username) => {
           return computeMatches(matches, username)
-            .map((match) =>
-              match.GameDraws === 3
-                ? 0
-                : username === match.Player1Username
-                  ? match.Player1GameAndByeWins === 2 ? 3 : match.Player1GameAndByeWins
-                  : match.Player2GameAndByeWins === 2 ? 3 : match.Player2GameAndByeWins
-            )
+            .map((match) => {
+              if (match.GameDraws === 3) {
+                return 0;
+              }
+              return username === match.Player1Username
+                ? match.Player1GameAndByeWins === 2 ? 3 : match.Player1GameAndByeWins
+                : match.Player2GameAndByeWins === 2 ? 3 : match.Player2GameAndByeWins;
+            })
             .reduce(sum, 0);
         };
 
@@ -394,33 +395,35 @@
 
         const computeLastWins = (matches, username) => {
           return computeMatches(matches, username)
-            .map((match) =>
-              match.GameDraws === 3
-                ? [0, 0]
-                : username === match.Player1Username
-                  ? match.Player1GameAndByeWins === (
-                      match.Player1GameAndByeWins + match.Player2GameAndByeWins
-                    ) ? [1, 1] : [0, match.Player1GameAndByeWins]
-                  : match.Player2GameAndByeWins === (
-                      match.Player1GameAndByeWins + match.Player2GameAndByeWins
-                    ) ? [1, 1] : [0, match.Player2GameAndByeWins]
-            )
+            .map((match) => {
+              if (match.GameDraws === 3) {
+                return [0, 0];
+              }
+              return username === match.Player1Username
+                ? match.Player1GameAndByeWins === (
+                    match.Player1GameAndByeWins + match.Player2GameAndByeWins
+                  ) ? [1, 1] : [0, match.Player1GameAndByeWins]
+                : match.Player2GameAndByeWins === (
+                    match.Player1GameAndByeWins + match.Player2GameAndByeWins
+                  ) ? [1, 1] : [0, match.Player2GameAndByeWins];
+            })
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0])
         };
 
         const computeRecord = (matches, username) => {
           return computeMatches(matches, username)
-            .map((match) =>
-              match.GameDraws === 3
-                ? [0, 1, 0]
-                : username === match.Player1Username
-                  ? match.Player1GameAndByeWins === 2
-                    ? [1, 0, 0]
-                    : match.Player1GameAndByeWins === 1 ? [0, 0, 1] : [0, 1, 0]
-                  : match.Player2GameAndByeWins === 2
-                    ? [1, 0, 0]
-                    : match.Player2GameAndByeWins === 1 ? [0, 0, 1] : [0, 1, 0]
-            )
+            .map((match) => {
+              if (match.GameDraws === 3) {
+                return [0, 1, 0];
+              }
+              return username === match.Player1Username
+                ? match.Player1GameAndByeWins === 2
+                  ? [1, 0, 0]
+                  : match.Player1GameAndByeWins === 1 ? [0, 0, 1] : [0, 1, 0]
+                : match.Player2GameAndByeWins === 2
+                  ? [1, 0, 0]
+                  : match.Player2GameAndByeWins === 1 ? [0, 0, 1] : [0, 1, 0];
+            })
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
         };
 
