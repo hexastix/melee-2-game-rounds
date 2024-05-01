@@ -59,6 +59,8 @@
       crossorigin="anonymous"
     ></script>
     <script>
+      const sum = (a, b) => { return a + b; };
+
       function handleFile(fileInput, validateItems, assignItems) {
         fileInput.parentNode.classList.remove("was-validated");
 
@@ -334,8 +336,6 @@
           submitButton.blur();
           return;
         }
-
-        const sum = (a, b) => { return a + b; };
 
         const computeMatches = (matches, username) => {
           return matches.filter(
