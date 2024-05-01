@@ -396,14 +396,10 @@
                 : username === match.Player1Username
                   ? match.Player1GameAndByeWins === (
                       match.Player1GameAndByeWins + match.Player2GameAndByeWins
-                    )
-                    ? [1, 1]
-                    : match.Player1GameAndByeWins === 0 ? [0, 0] : [0, 1]
+                    ) ? [1, 1] : [0, match.Player1GameAndByeWins]
                   : match.Player2GameAndByeWins === (
                       match.Player1GameAndByeWins + match.Player2GameAndByeWins
-                    )
-                    ? [1, 1]
-                    : match.Player2GameAndByeWins === 0 ? [0, 0] : [0, 1]
+                    ) ? [1, 1] : [0, match.Player2GameAndByeWins]
             )
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0])
         };
