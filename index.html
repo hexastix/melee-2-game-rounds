@@ -107,23 +107,6 @@
         });
       }
 
-      function validatePlayers(players) {
-        if (!Array.isArray(players)) {
-          return "Invalid JSON contents (expected array of players)";
-        }
-        for (player of players) {
-          for (property of ["Username", "PlayerNameLastFirst", "TeamId", "Status"]) {
-            if (!Object.hasOwn(player, property)) {
-              return `Invalid JSON contents (missing "${property}" property)`;
-            }
-          }
-        }
-        return "";
-      }
-
-      var allPlayers = [];
-      const assignAllPlayers = (items) => { allPlayers = items; };
-
       function validateMatches(matches) {
         if (!Array.isArray(matches)) {
           return "Invalid JSON contents (expected array of matches)";
