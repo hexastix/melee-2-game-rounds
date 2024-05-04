@@ -118,18 +118,18 @@
             }
           }
           for (competitor of match.Competitors) {
-            for (property of ["Team", "GameWinsAndGameByes"]) {
+            for (property of ["TeamId", "Team", "GameWinsAndGameByes"]) {
               if (!Object.hasOwn(competitor, property)) {
                 return `Invalid JSON contents (missing "${property}" property)`;
               }
             }
-            for (property of ["Players", "IsActive"]) {
+            for (property of ["ID", "Players", "IsActive"]) {
               if (!Object.hasOwn(competitor.Team, property)) {
                 return `Invalid JSON contents (missing "${property}" property)`;
               }
             }
             for (player of competitor.Team.Players) {
-              for (property of ["TeamId", "ID", "Username", "NameLastFirst"]) {
+              for (property of ["NameLastFirst"]) {
                 if (!Object.hasOwn(player, property)) {
                   return `Invalid JSON contents (missing "${property}" property)`;
                 }
@@ -289,22 +289,22 @@
           matchesPanes.appendChild(nextRoundPane);
         }
 
-        const computeMatches = (matches, username) => {
+        const computeMatches = (matches, teamId) => {
           return matches.filter(
             (match) => match.Competitors.some(
-              (competitor) => competitor.Team.Players[0].Username === username
+              (competitor) => competitor.TeamId === teamId
             )
           )
         };
 
-        const computePoints = (matches, username) => {
-          return computeMatches(matches, username)
+        const computePoints = (matches, teamId) => {
+          return computeMatches(matches, teamId)
             .map((match) => {
               if (match.GameDraws === 3) {
                 return 0;
               }
               const competitor = match.Competitors.find(
-                (competitor) => competitor.Team.Players[0].Username === username
+                (competitor) => competitor.TeamId === teamId
               );
               return competitor.GameWinsAndGameByes == 2
                 ? 3 : competitor.GameWinsAndGameByes;
@@ -312,29 +312,29 @@
             .reduce(sum, 0);
         };
 
-        const computeGamesWon = (matches, username) => {
-          return computeMatches(matches, username)
+        const computeGamesWon = (matches, teamId) => {
+          return computeMatches(matches, teamId)
             .map((match) =>
               match.Competitors.find(
-                (competitor) => competitor.Team.Players[0].Username === username
+                (competitor) => competitor.TeamId === teamId
               ).GameWinsAndGameByes
             )
             .reduce(sum, 0);
         };
 
-        const computeOpponents = (matches, username) => {
-          return computeMatches(matches, username)
+        const computeOpponents = (matches, teamId) => {
+          return computeMatches(matches, teamId)
             .map((match) => {
               const competitor = match.Competitors.find(
-                (competitor) => competitor.Team.Players[0].Username !== username
+                (competitor) => competitor.TeamId !== teamId
               );
-              return competitor ? competitor.Team.Players[0].Username : null;
+              return competitor ? competitor.TeamId : null;
             })
             .filter((opponent) => opponent);
         };
 
-        const computeStrengthOfSchedule = (matches, username) => {
-          const opponents = computeOpponents(matches, username);
+        const computeStrengthOfSchedule = (matches, teamId) => {
+          const opponents = computeOpponents(matches, teamId);
           if (opponents.length === 0) {
             return 0.0;
           }
@@ -352,8 +352,8 @@
           );
         };
 
-        const computeLastWins = (matches, username) => {
-          return computeMatches(matches, username)
+        const computeLastWins = (matches, teamId) => {
+          return computeMatches(matches, teamId)
             .map((match) => {
               if (match.GameDraws === 3) {
                 return [0, 0];
@@ -362,7 +362,7 @@
                 (competitor) => competitor.GameWinsAndGameByes
               ).reduce(sum, 0);
               const competitor = match.Competitors.find(
-                (competitor) => competitor.Team.Players[0].Username === username
+                (competitor) => competitor.TeamId === teamId
               );
               return competitor.GameWinsAndGameByes === gameWinsAndGameByesSum
                 ? [1, 1] : [0, competitor.GameWinsAndGameByes];
@@ -370,14 +370,14 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0])
         };
 
-        const computeRecord = (matches, username) => {
-          return computeMatches(matches, username)
+        const computeRecord = (matches, teamId) => {
+          return computeMatches(matches, teamId)
             .map((match) => {
               if (match.GameDraws === 3) {
                 return [0, 1, 0];
               }
               const competitor = match.Competitors.find(
-                (competitor) => competitor.Team.Players[0].Username === username
+                (competitor) => competitor.TeamId === teamId
               );
               return competitor.GameWinsAndGameByes === 2
                 ? [1, 0, 0]
@@ -388,28 +388,25 @@
 
         completedRoundNumbers.forEach((number) => {
           const matches = allMatches.filter((match) => match.RoundNumber <= number);
-          let players = new Map();
+          let teams = new Map();
           matches.forEach((match) => {
             if (match.Competitors[0]) {
-              const player = match.Competitors[0].Team.Players[0];
-              players.set(player.ID, player);
+              teams.set(match.Competitors[0].TeamId, match.Competitors[0].Team);
             }
             if (match.Competitors[1]) {
-              const player = match.Competitors[1].Team.Players[0];
-              players.set(player.ID, player);
+              teams.set(match.Competitors[1].TeamId, match.Competitors[1].Team);
             }
           });
-          const standings = Array.from(players.values())
-            .map((player) => {
+          const standings = Array.from(teams.values())
+            .map((team) => {
               return [
-                computePoints(matches, player.Username),
-                computeGamesWon(matches, player.Username),
-                Math.round(10e5 * computeStrengthOfSchedule(matches, player.Username))
-                  / 10e5,
-                computeLastWins(matches, player.Username),
-                player.TeamId,
-                computeRecord(matches, player.Username),
-                player.NameLastFirst,
+                computePoints(matches, team.ID),
+                computeGamesWon(matches, team.ID),
+                Math.round(10e5 * computeStrengthOfSchedule(matches, team.ID)) / 10e5,
+                computeLastWins(matches, team.ID),
+                team.ID,
+                computeRecord(matches, team.ID),
+                team.Players[0].NameLastFirst,
               ]
             })
             .toSorted((lhs, rhs) => {
@@ -426,7 +423,7 @@
               if ((lhs[3][0] + lhs[3][1]) / 2  < (rhs[3][0] + rhs[3][1]) / 2) {
                 return 1;
               }
-              if (lhs[4] < rhs[4]) { return -1; } // TeamId
+              if (lhs[4] < rhs[4]) { return -1; } // ID
               if (lhs[4] > rhs[4]) { return 1; }
               return 0;
             });
@@ -492,41 +489,39 @@
         });
 
         if (nextRoundPane) {
-          let activePlayers = [];
+          let activeTeams = [];
           const roundNumber = completedRoundNumbers[completedRoundNumbers.length - 1];
           allMatches
             .filter((match) => match.RoundNumber === roundNumber)
             .forEach((match) => {
               match.Competitors.forEach((competitor) => {
                 if (competitor.Team.IsActive) {
-                  activePlayers.push(competitor.Team.Players[0]);
+                  activeTeams.push(competitor.Team);
                 }
               })
             });
-          const unpairedPlayers = activePlayers
-            .map((player) =>
-              [Math.random(), computePoints(allMatches, player.Username), player]
+          const unpairedTeams = activeTeams
+            .map((team) =>
+              [Math.random(), computePoints(allMatches, team.ID), team]
             )
             .sort((lhs, rhs) => lhs[0] - rhs[0])
             .sort((lhs, rhs) => rhs[1] - lhs[1])
             .map((t) => t[2]);
           let pairings = [];
           let table = 1;
-          while (unpairedPlayers.length > 1) {
-            const player1 = unpairedPlayers.shift();
-            const player2 = unpairedPlayers.splice(
-              unpairedPlayers.findIndex(
-                (player) => !computeOpponents(
-                  allMatches, player1.Username
-                ).includes(player.Username)
+          while (unpairedTeams.length > 1) {
+            const team1 = unpairedTeams.shift();
+            const team2 = unpairedTeams.splice(
+              unpairedTeams.findIndex(
+                (team) => !computeOpponents(allMatches, team1.ID).includes(team.ID)
               ),
               1,
             )[0];
-            pairings.push([table, player1, player2]);
+            pairings.push([table, team1, team2]);
             table += 1;
           }
-          if (unpairedPlayers.length === 1) {
-            pairings.unshift([null, unpairedPlayers[0], null]);
+          if (unpairedTeams.length === 1) {
+            pairings.unshift([null, unpairedTeams[0], null]);
           }
 
           const pairingsHeader = document.createElement("h4");
@@ -550,12 +545,12 @@
 
           const pairingsTableBody = document.createElement("tbody");
           pairings.forEach((pairing, index) => {
-            const [table, player1, player2] = pairing;
+            const [table, team1, team2] = pairing;
             const row = pairingsTableBody.insertRow();
             for (text of [
               table ? `${table}` : "-",
-              player1.NameLastFirst,
-              player2 ? player2.NameLastFirst : "N/A (bye)",
+              team1.Players[0].NameLastFirst,
+              team2 ? team2.Players[0].NameLastFirst : "N/A (bye)",
             ]) {
               row.insertCell().appendChild(document.createTextNode(text));
             }
@@ -574,10 +569,10 @@
               pairing[2]
                 ? JSON.stringify({
                   TableNumber: pairing[0],
-                  Teams: [{ID: pairing[1].TeamId}, {ID: pairing[2].TeamId}],
+                  Teams: [{ID: pairing[1].ID}, {ID: pairing[2].ID}],
                 })
                 : JSON.stringify({
-                  ByeReason: "AlgorithmAssigned", Teams: [{ID: pairing[1].TeamId}]
+                  ByeReason: "AlgorithmAssigned", Teams: [{ID: pairing[1].ID}]
                 })
             )
             .join(", ");
