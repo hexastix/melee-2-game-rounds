@@ -67,8 +67,8 @@
           case 0:
             return;
           case 1: {
-            const playersFile = fileInput.files[0];
-            if (playersFile.type === "application/json") {
+            const file = fileInput.files[0];
+            if (file.type === "application/json") {
               const reader = new FileReader();
               reader.onload = (event) => {
                 let items = [];
@@ -91,7 +91,7 @@
                 fileInput.setCustomValidity("Failed to read the file");
                 fileInput.parentNode.classList.add("was-validated");
               };
-              reader.readAsText(playersFile);
+              reader.readAsText(file);
               return;
             } else {
               fileInput.setCustomValidity("Incorrect file type");
