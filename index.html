@@ -92,17 +92,16 @@
                 fileInput.parentNode.classList.add("was-validated");
               };
               reader.readAsText(file);
-              return;
             } else {
               fileInput.setCustomValidity("Incorrect file type");
+              fileInput.parentNode.classList.add("was-validated");
             }
             break;
           }
           default:
             fileInput.setCustomValidity("Too many files");
+            fileInput.parentNode.classList.add("was-validated");
         }
-
-        fileInput.parentNode.classList.add("was-validated");
       }
 
       function validatePlayers(players) {
