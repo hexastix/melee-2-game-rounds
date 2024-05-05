@@ -204,7 +204,12 @@
         ].sort();
         const completedRoundNumbers = roundNumbers.filter(
           (number) =>
-            allMatches
+            Array(number)
+              .fill(1)
+              .map((x, y) => x + y)
+              .filter(value => roundNumbers.includes(value))
+              .length === number
+            && allMatches
               .filter((match) => match.RoundNumber === number)
               .every((match) => match.HasResults)
         );
@@ -273,6 +278,15 @@
           roundPane.appendChild(matchesTable);
           matchesPanes.appendChild(roundPane);
         });
+
+        if (completedRoundNumbers.length === 0) {
+          const standingsText = document.createElement("p");
+          standingsText.appendChild(document.createTextNode("No standings"));
+          standingsPanes.replaceChildren(standingsText);
+
+          submitButton.blur();
+          return;
+        }
 
         let nextRoundPane = null;
 
