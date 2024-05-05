@@ -389,6 +389,25 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
         };
 
+        const computeGameRecord = (matches, teamId) => {
+          return computeMatches(matches, teamId)
+            .map((match) => {
+              if (match.GameDraws === 3) {
+                return [0, 0, 2];
+              }
+              const competitor = match.Competitors.find(
+                (competitor) => competitor.TeamId === teamId
+              );
+              const opponent = match.Competitors.find(
+                (competitor) => competitor.TeamId !== teamId
+              );
+              return opponent
+                ? [competitor.GameWinsAndGameByes, opponent.GameWinsAndGameByes, 0]
+                : [competitor.GameWinsAndGameByes, 0, 0];
+            })
+            .reduce((a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], [0, 0, 0]);
+        };
+
         completedRoundNumbers.forEach((number) => {
           const matches = allMatches.filter((match) => match.RoundNumber <= number);
           let teams = new Map();
@@ -409,6 +428,7 @@
                 computeLastWins(matches, team.ID),
                 team.ID,
                 computeMatchRecord(matches, team.ID),
+                computeGameRecord(matches, team.ID),
                 team.Players[0].NameLastFirst,
               ]
             })
@@ -453,8 +473,9 @@
           const standingsTableHeaderRow = standingsTableHeader.insertRow();
           [
             ["Rank", 10],
-            ["Player", 40],
+            ["Player", 30],
             ["Match Record", 10],
+            ["Game Record", 10],
             ["Points", 10],
             ["Wins", 10],
             ["SoS", 10],
@@ -471,12 +492,15 @@
           const standingsTableBody = document.createElement("tbody");
           standings.forEach((standing, index) => {
             const rank = index + 1;
-            const [points, wins, sos, lastWins, _teamId, matchRecord, name] = standing;
+            const [
+              points, wins, sos, lastWins, _teamId, matchRecord, gameRecord, name
+            ] = standing;
             const row = standingsTableBody.insertRow();
             for (text of [
               rank,
               name,
               `${matchRecord[0]}-${matchRecord[1]}-${matchRecord[2]}`,
+              `${gameRecord[0]}-${gameRecord[1]}-${gameRecord[2]}`,
               points,
               wins,
               `${(100 * sos).toFixed(5)}%`,
