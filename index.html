@@ -215,11 +215,7 @@
         );
 
         roundNumbers.forEach((number) => {
-          const active = number === roundNumbers[roundNumbers.length - 1]
-            && !(
-              roundNumbers.length === completedRoundNumbers.length
-                && allPlayers.length !== 0
-            );
+          const active = number === roundNumbers[roundNumbers.length - 1];
 
           const roundTab = document.createElement("button");
           roundTab.setAttribute("type", "button");
@@ -291,18 +287,16 @@
         let nextRoundPane = null;
 
         if (roundNumbers.length === completedRoundNumbers.length) {
-          const active = allPlayers.length !== 0;
-
           const roundTab = document.createElement("button");
           roundTab.setAttribute("type", "button");
-          roundTab.setAttribute("class", `nav-link my-3 ${active ? "active" : ""}`);
+          roundTab.setAttribute("class", "nav-link my-3");
           roundTab.setAttribute("data-bs-toggle", "pill");
           roundTab.setAttribute("data-bs-target", "#matches-next-round-pane");
           roundTab.appendChild(document.createTextNode("Next round"));
           matchesTabs.appendChild(roundTab);
 
           nextRoundPane = document.createElement("div");
-          nextRoundPane.setAttribute("class", `tab-pane ${active ? "active" : ""}`);
+          nextRoundPane.setAttribute("class", "tab-pane");
           nextRoundPane.setAttribute("id", "matches-next-round-pane");
           matchesPanes.appendChild(nextRoundPane);
         }
