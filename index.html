@@ -373,7 +373,7 @@
             .reduce((a, b) => [a[0] + b[0], a[1] + b[1]], [0, 0])
         };
 
-        const computeRecord = (matches, teamId) => {
+        const computeMatchRecord = (matches, teamId) => {
           return computeMatches(matches, teamId)
             .map((match) => {
               if (match.GameDraws === 3) {
@@ -408,7 +408,7 @@
                 Math.round(10e5 * computeStrengthOfSchedule(matches, team.ID)) / 10e5,
                 computeLastWins(matches, team.ID),
                 team.ID,
-                computeRecord(matches, team.ID),
+                computeMatchRecord(matches, team.ID),
                 team.Players[0].NameLastFirst,
               ]
             })
@@ -454,7 +454,7 @@
           [
             ["Rank", 10],
             ["Player", 40],
-            ["Record", 10],
+            ["Match Record", 10],
             ["Points", 10],
             ["Wins", 10],
             ["SoS", 10],
@@ -471,12 +471,12 @@
           const standingsTableBody = document.createElement("tbody");
           standings.forEach((standing, index) => {
             const rank = index + 1;
-            const [points, wins, sos, lastWins, _teamId, record, name] = standing;
+            const [points, wins, sos, lastWins, _teamId, matchRecord, name] = standing;
             const row = standingsTableBody.insertRow();
             for (text of [
               rank,
               name,
-              `${record[0]}-${record[1]}-${record[2]}`,
+              `${matchRecord[0]}-${matchRecord[1]}-${matchRecord[2]}`,
               points,
               wins,
               `${(100 * sos).toFixed(5)}%`,
