@@ -67,35 +67,42 @@
           case 0:
             return;
           case 1: {
-            const file = fileInput.files[0];
-            if (file.type === "application/json") {
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                let items = [];
-                try {
-                  items = JSON.parse(event.target.result);
-                } catch {
-                  fileInput.setCustomValidity("Invalid JSON");
-                  fileInput.parentNode.classList.add("was-validated");
-                  return;
-                }
+            const promise = new Promise((resolve, reject) => {
+              const file = fileInput.files[0];
+              if (file.type === "application/json") {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  let items = [];
+                  try {
+                    items = JSON.parse(event.target.result);
+                  } catch {
+                    reject("Invalid JSON");
+                    return;
+                  }
 
-                const validity = validateItems(items);
-                if (validity === "") {
-                  assignItems(items);
-                }
-                fileInput.setCustomValidity(validity);
-                fileInput.parentNode.classList.add("was-validated");
-              };
-              reader.onerror = (event) => {
-                fileInput.setCustomValidity("Failed to read the file");
-                fileInput.parentNode.classList.add("was-validated");
-              };
-              reader.readAsText(file);
-            } else {
-              fileInput.setCustomValidity("Incorrect file type");
+                  const validity = validateItems(items);
+                  if (validity === "") {
+                    resolve(items);
+                  } else {
+                    reject(validity);
+                  }
+                };
+                reader.onerror = (event) => {
+                  reject("Failed to read the file");
+                };
+                reader.readAsText(file);
+              } else {
+                reject("Incorrect file type");
+              }
+            });
+            promise.then((items) => {
+              assignItems(items);
+              fileInput.setCustomValidity("");
               fileInput.parentNode.classList.add("was-validated");
-            }
+            }).catch((validity) => {
+              fileInput.setCustomValidity(validity);
+              fileInput.parentNode.classList.add("was-validated");
+            });
             break;
           }
           default:
