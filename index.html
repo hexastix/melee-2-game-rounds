@@ -227,7 +227,9 @@
 
           const matchesTableHeader = document.createElement("thead");
           const matchesTableHeaderRow = matchesTableHeader.insertRow();
-          [["Player 1", 40], ["Result", 20], ["Player 2", 40]].forEach((elem) => {
+          [
+            ["Table", 10], ["Player 1", 35], ["Result", 20], ["Player 2", 35]
+          ].forEach((elem) => {
             const [text, width] = elem;
             const cell = document.createElement("th");
             cell.setAttribute("style", `width: ${width}%`);
@@ -250,6 +252,7 @@
                 competitor2 ? competitor2.GameWinsAndGameByes : 0}`
               : "Not reported";
             for (text of [
+              match.TableNumber === null ? "-" : match.TableNumber,
               player1Name ? player1Name : "N/A (bye)",
               result,
               player2Name ? player2Name : "N/A (bye)",
@@ -534,7 +537,7 @@
 
           const pairingsTableHeader = document.createElement("thead");
           const pairingsTableHeaderRow = pairingsTableHeader.insertRow();
-          [["Table", 20], ["Player 1", 40], ["Player 2", 40]].forEach((elem) => {
+          [["Table", 10], ["Player 1", 45], ["Player 2", 45]].forEach((elem) => {
             const [text, width] = elem;
             const cell = document.createElement("th");
             cell.setAttribute("style", `width: ${width}%`);
